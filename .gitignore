@@ -5,4 +5,6 @@
 !*.sty
 !README.md
 !*.gitignore
-*/Figures
+!/Figures
+!*.jpeg
+!*.png
