@@ -92,8 +92,21 @@ A labeled subset of the PURE dataset, called the RegExpPURE Dataset by Ivanov et
 
 For the experiments of RO2, a custom dataset was made with SRS documents from three real projects conducted by the Ministry of ICT, The People's Republic of Bangladesh - A Training Database, an Enterprise Management System, and an AI Chatbot. The requirements were collected and labeled into FR (Functional Requirements) and NFR (Non-Functional Requirements) by three expert personnel from the software industry of Bangladesh - two experienced product managers and an experienced AI engineer. To handle labeling conflict, we revisited standard definitions of FR and NFR \cite{wiegers2013software}, and industry-recognized standards such as IEEE guidelines \cite{schmidt2000implementing} and had discussions until agreement was reached. 
 
+\section{Methodology}
 
+\subsection{Leveraging the Power of Transformer Models}
 
+\subsection{Noise Reduction in Requirements}
+
+\subsection{GPT-4 Text Embedding}
+
+Our experimentation utilizes a two-step Search-Ask method to enable GPT to answer questions using a library of reference texts. We selected an SRS as an ideal SRS completely complying with IEEE Std 830 (1998) , also used in the paper \textbf{PURE: a Dataset of Public Requirements Documents}\cite{norabid2022multimodal} for benchmarking ideal functional and non-functional requirements. 
+
+We began by dividing the Software Requirements Specification (SRS) into short, self-contained sections. We generated embeddings for each section using the GPT-4 embeddings API and stored them in a vector database (ChromaDB). ChromaDB can perform efficient semantic search across the entire SRS, even when user queries did not share direct lexical overlap with the document text.       To retrieve relevant information, we employed Maximum Marginal Relevance (MMR), which allowed us to balance relevance and diversity in the retrieved segments and avoid redundant or overly similar results.
+
+Once the candidate segments were retrieved, we ranked them according to their semantic similarity to a model-generated hypothetical ideal answer. This ranking process ensured that we selected the most contextually meaningful information for the task. We then inserted the highest-ranked SRS sections directly into the prompt.
+
+With this curated context, we asked the model to interpret the SRS content, resolve ambiguities, and extract both functional and non-functional requirements. By separating the search and generation steps, we avoided the shortcomings of fine-tuning and message-insertion memory techniques, which can introduce factual drift or reduce reliability. Our approach ensured consistent recall of the original SRS while supporting accurate and dependable requirements classification, even when the source material was unstructured or ambiguous.
 
 % \section{Ease of Use}
 
