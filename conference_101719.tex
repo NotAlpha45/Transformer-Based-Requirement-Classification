@@ -297,8 +297,21 @@ BERT       & 74 \\
 
 For our experiments and proposed approach of identifying requirement noise, we used the RegExpPURE dataset \cite{ivanov2021regexppure_extracting_software_requirements}. So, our baseline was the results in that paper for the dataset in which they utilized the BERT base model for extracting requirements. Though their work may not directly state noise reduction, but their work achieved similar objectives. As seen in \autoref{Dataset} their dataset consists labeled sentences of requirements and non requirements. And these non requirement sentences are precisely what we have defined as noise. So, the rationale for using this paper as a baseline is quite reasonable.
 
+
 \section{Discussion}
 \label{Discussion}
+
+\subsection{The Rationale for Accuracy}
+
+Accuracy is intuitive and easy to understand. It directly reflects the overall correctness of the model’s predictions. In many scenarios, balanced performance across different classes is desirable. Accuracy treats all classes equally. Moreover, when the class distribution is roughly uniform (which is the case for the RegExpPURE Dataset), accuracy is a reasonable choice. And hence, accuracy was the chosen metric. \cite{sokolova2009systematic_classification}.
+
+\subsection{Base Classifier vs Ensemble Pooling}
+
+From the results in \autoref{table:results_comparison} and \autoref{table:baseline_results} shows that our approach combining DistilBERT and Random Forest in ensemble pooling performs better in terms of accuracy when compared against all the approaches and baseline results. However, all the approaches with RoBERTa had quite close results, except Random Forest. This deviation is most likely due to how RoBERTa utilizes byte-pair encoding in tokenization and how the inner encoder layers attune to the context of the sequences \cite{liu2019roberta}. 
+
+The baseline paper showed the most promising result with BERT with about 74\% in accuracy. But baseline classifier of BERT, similar to DistilBERT and RoBERTa uses a neural network layer with a linear softmax activation function to generate class probability distribution. While effective in most cases, this classification task can benefit from more robust method of classification, ensemble classification. Since ensemble classifiers use bagging of sub classifiers, it is more robust in classification. Random Forest is one such ensemble method that ensembles decision trees. These trees or sub classifiers work in tandem for classification and improves accuracy, as seen from our experiments. Again, the rationale behind choosing DistilBERT and RoBERTa comes to their lightweight performance. They require much less computing resources compared to some other larger models and still remains a popular choice for smaller NLP related works. 
+
+However, the lightweight nature is also one of the drawbacks of our approach. The accuracy results are still in the range below 80, which is a clear indication that these models fall short due to having smaller number of parameters compared to state of the art GPT, Gemini and LLAMA models (inferred from the ``Densing law of LLMs'' \cite{xiao2025densing}). So, as a future extension in requirement noise reduction, the viability of the state of the art models as well as stronger classification layers (stacking multiple classifiers for starters) remain as an yet to explore prospect. 
 
 
 % \section{Ease of Use}
