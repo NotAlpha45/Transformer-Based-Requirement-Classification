@@ -293,102 +293,86 @@ For the experiments, the core DistilBERT and RoBERTa models, used for ensemble p
 
 For the classifiers, all were fine tuned with 10 fold grid search cross validation. The target metric for the hyperparameter tuning was accuracy. The optimal hyperparameters for the models are as follows in \autoref{tab:lgbm_hyperparameters}, \autoref{tab:rf_hyperparameters}, \autoref{tab:svm_hyperparameters}, and \autoref{tab:xgb_hyperparameters}.
 
+% \begin{table}
+%   \caption{Frequency of Special Characters}
+%   \label{tab:freq}
+%   \begin{tabular}{ccl}
+%     \toprule
+%     Non-English or Math&Frequency&Comments\\
+%     \midrule
+%     \O & 1 in 1,000& For Swedish names\\
+%     $\pi$ & 1 in 5& Common in math\\
+%     \$ & 4 in 5 & Used in business\\
+%     $\Psi^2_1$ & 1 in 40,000& Unexplained usage\\
+%   \bottomrule
+% \end{tabular}
+% \end{table}
+
 \begin{table}[htbp]
 \caption{Random Forest Hyperparameters for RoBERTa and DistilBERT Pairings}
-\begin{center}
-\renewcommand{\arraystretch}{1.1}
-\begin{tabular}{|c|c|c|}
+\centering
+\footnotesize
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{lcc}
 \hline
-\textbf{Hyperparameter} & \multicolumn{2}{|c|}{\textbf{Model Pairing}} \\
-\cline{2-3}
-\textbf{ } & \textbf{\textit{RoBERTa}} & \textbf{\textit{DistilBERT}} \\
+\textbf{Hyperparameter} & \textbf{\textit{RoBERTa}} & \textbf{\textit{DistilBERT}} \\
 \hline
-Max Depth (\texttt{max\_depth})            & None & 10 \\
-\hline
-Min Samples Leaf (\texttt{min\_samples\_leaf})  & 4 & 4 \\
-\hline
-Min Samples Split (\texttt{min\_samples\_split}) & 2 & 2 \\
-\hline
-Number of Estimators (\texttt{n\_estimators})   & 300 & 100 \\
+Max Depth (\texttt{max\_depth})                 & None & 10  \\
+Min Samples Leaf (\texttt{min\_samples\_leaf})  & 4    & 4   \\
+Min Samples Split (\texttt{min\_samples\_split})& 2    & 2   \\
+Number of Estimators (\texttt{n\_estimators})   & 300  & 100 \\
 \hline
 \end{tabular}
 \label{tab:rf_hyperparameters}
-\end{center}
 \end{table}
 
-\begin{table}[htbp]
-\caption{LightGBM Hyperparameters for RoBERTa and DistilBERT Pairings}
-\begin{center}
-\renewcommand{\arraystretch}{1.1}
-\begin{tabular}{|c|c|c|}
-\hline
-\textbf{Hyperparameter} & \multicolumn{2}{|c|}{\textbf{Model Pairing}} \\
-\cline{2-3}
-\textbf{} & \textbf{\textit{RoBERTa}} & \textbf{\textit{DistilBERT}} \\
-\hline
-Colsample by Tree (\texttt{colsample\_bytree})   & 1.0 & 1.0 \\
-\hline
-Learning Rate (\texttt{learning\_rate})          & 0.1 & 0.1 \\
-\hline
-Min Child Samples (\texttt{min\_child\_samples}) & 20  & 50 \\
-\hline
-Number of Estimators (\texttt{n\_estimators})    & 300 & 200 \\
-\hline
-Num Leaves (\texttt{num\_leaves})                & 50  & 50 \\
-\hline
-Subsample (\texttt{subsample})                   & 0.8 & 0.8 \\
-\hline
-\end{tabular}
-\label{tab:lgbm_hyperparameters}
-\end{center}
+
+\begin{table}
+  \caption{LightGBM Hyperparameters for RoBERTa and DistilBERT Pairings}
+  \label{tab:lgbm_hyperparameters}
+  \begin{tabular}{ccl}
+    \toprule
+    Hyperparameter & RoBERTa & DistilBERT \\
+    \midrule
+    Colsample by Tree (\texttt{colsample\_bytree}) & 1.0 & 1.0 \\
+    Learning Rate (\texttt{learning\_rate})        & 0.1 & 0.1 \\
+    Min Child Samples (\texttt{min\_child\_samples}) & 20 & 50 \\
+    Number of Estimators (\texttt{n\_estimators})  & 300 & 200 \\
+    Num Leaves (\texttt{num\_leaves})              & 50  & 50 \\
+    Subsample (\texttt{subsample})                 & 0.8 & 0.8 \\
+    \bottomrule
+  \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
-\caption{XGBoost Hyperparameters for RoBERTa and DistilBERT Pairings}
-\begin{center}
-\renewcommand{\arraystretch}{1.1}
-\begin{tabular}{|c|c|c|}
-\hline
-\textbf{Hyperparameter} & \multicolumn{2}{|c|}{\textbf{Model Pairing}} \\
-\cline{2-3}
-\textbf{} & \textbf{\textit{RoBERTa}} & \textbf{\textit{DistilBERT}} \\
-\hline
-Learning Rate (\texttt{learning\_rate}) & 0.1 & 0.1 \\
-\hline
-Max Depth (\texttt{max\_depth}) & 5 & 5 \\
-\hline
-Number of Estimators (\texttt{n\_estimators}) & 300 & 300 \\
-\hline
-Subsample (\texttt{subsample}) & 0.8 & 0.7 \\
-\hline
-Colsample by Tree (\texttt{colsample\_bytree}) & 0.8 & 1 \\
-\hline
-Gamma (\texttt{gamma}) & 0.1 & 0 \\
-\hline
-\end{tabular}
-\label{tab:xgb_hyperparameters}
-\end{center}
+\begin{table}
+  \caption{XGBoost Hyperparameters for RoBERTa and DistilBERT Pairings}
+  \label{tab:xgb_hyperparameters}
+  \begin{tabular}{ccl}
+    \toprule
+    Hyperparameter & RoBERTa & DistilBERT \\
+    \midrule
+    Learning Rate (\texttt{learning\_rate})  & 0.1 & 0.1 \\
+    Max Depth (\texttt{max\_depth})          & 5   & 5 \\
+    Number of Estimators (\texttt{n\_estimators}) & 300 & 300 \\
+    Subsample (\texttt{subsample})           & 0.8 & 0.7 \\
+    Colsample by Tree (\texttt{colsample\_bytree}) & 0.8 & 1.0 \\
+    Gamma (\texttt{gamma})                   & 0.1 & 0 \\
+    \bottomrule
+  \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
-\caption{SVM Hyperparameters for RoBERTa and DistilBERT Pairings}
-\begin{center}
-\renewcommand{\arraystretch}{1.1}
-\begin{tabular}{|c|c|c|}
-\hline
-\textbf{Hyperparameter} & \multicolumn{2}{|c|}{\textbf{Model Pairing}} \\
-\cline{2-3}
-\textbf{} & \textbf{\textit{RoBERTa}} & \textbf{\textit{DistilBERT}} \\
-\hline
-C (\texttt{C}) & 10 & 10 \\
-\hline
-Gamma (\texttt{gamma}) & scale & auto \\
-\hline
-Kernel (\texttt{kernel}) & rbf & rbf \\
-\hline
-\end{tabular}
-\label{tab:svm_hyperparameters}
-\end{center}
+\begin{table}
+  \caption{SVM Hyperparameters for RoBERTa and DistilBERT Pairings}
+  \label{tab:svm_hyperparameters}
+  \begin{tabular}{ccl}
+    \toprule
+    Hyperparameter & RoBERTa & DistilBERT \\
+    \midrule
+    C (\texttt{C})          & 10   & 10 \\
+    Gamma (\texttt{gamma})  & scale & auto \\
+    Kernel (\texttt{kernel}) & rbf  & rbf \\
+    \bottomrule
+  \end{tabular}
 \end{table}
 
 Again, the term ``Pairing'' is referred to as using the hidden layer of the language models through the classifier models to make predictions. 
@@ -399,51 +383,42 @@ Again, the term ``Pairing'' is referred to as using the hidden layer of the lang
 
 As per the setup described in \autoref{sec:methodology}, we compared our experiments with the baseline paper. Similar to the baseline work, results are based on the validation set. For the result comparison, primarily used the accuracy metric (The rationale behind this choice of metric is discussed in the \autoref{Discussion}). The \autoref{table:results_comparison} contains the results and the \autoref{table:baseline_results} shows the baseline paper result.  
 
-\begin{table}[htbp]
-\caption{Results Comparison of the Various Approaches}
-\begin{center}
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{|c|c|c|}
-\hline
-\textbf{Approach Category} & \textbf{Model / Technique} & \textbf{Accuracy (\%)} \\
-\hline
-\multirow{5}{*}{\textbf{\textit{DistilBERT}}}
- & DistilBERT Sequence Classifier & 76 \\
- & DistilBERT + Random Forest     & \textbf{78} \\
- & DistilBERT + XGB               & 77 \\
- & DistilBERT + LightGBM          & 77 \\
- & DistilBERT + SVM               & 76 \\
-\hline
-\multirow{5}{*}{\textbf{\textit{RoBERTa}}}
- & RoBERTa Sequence Classifier    & 77 \\
- & RoBERTa + Random Forest        & 75 \\
- & RoBERTa + XGB                  & 77 \\
- & RoBERTa + LightGBM             & 77 \\
- & RoBERTa + SVM                  & 77 \\
-\hline
-\end{tabular}
-\label{table:results_comparison}
-\end{center}
+\begin{table}
+  \caption{Results Comparison of the Various Approaches}
+  \label{tab:results_comparison}
+  \begin{tabular}{ccl}
+    \toprule
+    Approach Category & Model / Technique & Accuracy (\%) \\
+    \midrule
+    DistilBERT & DistilBERT Sequence Classifier & 76 \\
+    DistilBERT & DistilBERT + Random Forest     & \textbf{78} \\
+    DistilBERT & DistilBERT + XGB               & 77 \\
+    DistilBERT & DistilBERT + LightGBM          & 77 \\
+    DistilBERT & DistilBERT + SVM               & 76 \\
+    \midrule
+    RoBERTa & RoBERTa Sequence Classifier & 77 \\
+    RoBERTa & RoBERTa + Random Forest     & 75 \\
+    RoBERTa & RoBERTa + XGB               & 77 \\
+    RoBERTa & RoBERTa + LightGBM          & 77 \\
+    RoBERTa & RoBERTa + SVM               & 77 \\
+    \bottomrule
+  \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
-\caption{Results of the Baseline Paper \cite{ivanov2021regexppure}}
-\begin{center}
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{|c|c|}
-\hline
-\textbf{Approach} & \textbf{Accuracy (\%)} \\
-\hline
-fastText   & 60 \\
-\hline
-ELMo + SVM & 59 \\
-\hline
-BERT       & 74 \\
-\hline
-\end{tabular}
-\label{table:baseline_results}
-\end{center}
+\begin{table}
+  \caption{Results of the Baseline Paper \cite{ivanov2021regexppure}}
+  \label{table:baseline_results}
+  \begin{tabular}{ccl}
+    \toprule
+    Approach & Accuracy (\%) & \\
+    \midrule
+    fastText   & 60 & \\
+    ELMo + SVM & 59 & \\
+    BERT       & 74 & \\
+    \bottomrule
+  \end{tabular}
 \end{table}
+
 
 For our experiments and proposed approach of identifying requirement noise, we used the RegExpPURE dataset \cite{ivanov2021regexppure}. So, our baseline was the results in that paper for the dataset in which they utilized the BERT base model for extracting requirements. Though their work may not directly state noise reduction, but their work achieved similar objectives. As seen in \autoref{Dataset} their dataset consists labeled sentences of requirements and non requirements. And these non requirement sentences are precisely what we have defined as noise. So, the rationale for using this paper as a baseline is quite reasonable.
 
