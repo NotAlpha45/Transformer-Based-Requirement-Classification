@@ -9,3 +9,5 @@
 !*.jpeg
 !*.png
 !/ICSCA_submission
+!/ICSCA_submission/Figures
+!*.mmd

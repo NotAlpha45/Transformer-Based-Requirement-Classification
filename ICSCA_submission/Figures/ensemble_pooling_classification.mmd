@@ -1,0 +1,59 @@
+%%{init: {'theme':'base', 'themeVariables': { 'lineColor':'#000000'}, 'flowchart': {'defaultRenderer': 'elk' } }}%%
+
+graph LR
+    Input["Input sequence"]
+    
+    subgraph Tokenizer["Tokenizer Layer"]
+        Token["Tokenization + [CLS] + [SEP]"]
+    end
+    
+    subgraph Lexicon["Lexicon Encoder"]
+        TE["Token Embeddings"]
+        PE["Position Embeddings"]
+        SE["Segment Embeddings"]
+    end
+    
+    subgraph Transformer["Transformer Layer"]
+        TE_Block["Transformer Encoder"]
+        Hidden1["[CLS] Hidden States"]
+        Hidden2["Middle Hidden States"]
+        Hidden3["[SEP] Hidden States"]
+    end
+    
+    Pool["Pooled Layer"]
+    
+    subgraph Classifier["Classifier Layer"]
+        EC["Ensemble Classifier"]
+    end
+    
+    Training["Training and Tuning"]
+    TrainLabels["Train Labels"]
+    Output["Predicted Labels"]
+    
+    Input --> Token
+    Token --> TE
+    Token --> PE
+    Token --> SE
+    
+    TE --> TE_Block
+    PE --> TE_Block
+    SE --> TE_Block
+    
+    TE_Block --> Hidden1
+    TE_Block --> Hidden2
+    TE_Block --> Hidden3
+    
+    Hidden1 --> Pool
+    
+    Pool --> EC
+    EC --> Output
+    
+    TrainLabels --> Training
+    Training --> Training
+    Training --> EC
+    
+    style Tokenizer fill:#b3e5e6
+    style Lexicon fill:#b3e5e6
+    style Transformer fill:#d4c5e8
+    style Classifier fill:#c8ddb8
+    style Training fill:#f5dda9,color:#000000
