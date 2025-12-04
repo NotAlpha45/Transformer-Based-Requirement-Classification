@@ -45,6 +45,8 @@
 \usepackage{xcolor}
 \usepackage{hyperref}
 \usepackage{multirow}
+\usepackage{tcolorbox}
+
 
 %%
 %% \BibTeX command to typeset BibTeX logo in the docs
@@ -134,7 +136,7 @@
   \city{Gazipur}
   \country{Bangladesh}
 }
-\email{armanhossain@iut-dhaka.edu}
+\email{armanhossain5@iut-dhaka.edu}
 
 \author{Ahsan Habib}
 \affiliation{%
@@ -142,7 +144,7 @@
   \city{Gazipur}
   \country{Bangladesh}
 }
-\email{ahsanhabib@iut-dhaka.edu}
+\email{ahsanhabib3@iut-dhaka.edu}
 
 \author{Ajwad Abrar}
 \affiliation{%
@@ -163,7 +165,7 @@
 %% The abstract is a short summary of the work to be presented in the
 %% article.
 \begin{abstract}
-The automation of the software development lifecycle (SDLC) is a key challenge in the field of software development. One of the main challenges in automation of the SDLC lies within the work of collecting, analyzing and establishing requirements, where the requirements collected from the stakeholders are often noisy, which can be difficult to organize. In order to facilitate the automation of requirement analysis, our study proposes a cost-effective approach - leveraging the lightweight DistilBERT and RoBERTA models with a method called ``Ensemble Pooling'' to filter out relevant requirements. Our experiments showcased an accuracy of 78\% for the ``Ensemble Pooling'' method, a higher score than readily available sequence classifier versions of the aforementioned models. 
+Software Requirements Specification (SRS) documents often contain substantial portions of irrelevant or non-actionable text that obscure true requirements and hinder downstream analysis activities within the Software Development Life Cycle (SDLC). To address this challenge, this paper presents a cost-efficient transformer-based pipeline for distinguishing actionable requirements from noisy sentences. The proposed approach introduces an ensemble pooling strategy that leverages the contextual embeddings of lightweight pretrained transformers, specifically DistilBERT and RoBERTa, and pairs them with ensemble classifiers such as Random Forest, XGBoost, and LightGBM. Using the RegExpPURE dataset, the method achieves improved performance over standard transformer sequence classification heads and outperforms the BERT-based baseline from prior work. The best configuration, DistilBERT paired with Random Forest, attains an accuracy of 78 percent. These results demonstrate that combining compact transformer models with robust ensemble methods provides an effective and resource-friendly solution for requirement noise reduction. The findings further lay the groundwork for extending automated requirement analysis to broader tasks such as requirement assessment, conflict detection, and multimodal requirement understanding.
 
 \end{abstract}
 
@@ -211,7 +213,9 @@ The automation of the software development lifecycle (SDLC) is a key challenge i
 
 \section{Introduction}
 
-Software requirements provide high-level descriptions of a system’s expected functionality and constraints, serving as the primary medium through which stakeholder intent is communicated to development teams~\cite{pohl2016requirements}. To be effective, requirements should maintain clarity, consistency, and completeness~\cite{wiegers2013software}. However, real-world Software Requirements Specification (SRS) documents often fall short of this expectation due to communication gaps, inconsistent documentation practices, and varied stakeholder perspectives~\cite{nuseibeh2000requirements}. These issues result in ambiguous or overly verbose specifications that contain substantial portions of irrelevant or non-actionable information, hereafter referred to as ``noise.'' Such noise complicates analytical processes such as classification, prioritization, and traceability, increasing manual effort for analysts and creating delays within the Software Development Life Cycle (SDLC).
+Software Requirements and Specifications engineering and collection is a crucial step in the software development lifecycle. Software requirements provide high-level descriptions of a system’s expected functionality and constraints, serving as the primary medium through which stakeholder intent is communicated to development teams~\cite{pohl2016requirements}. To optimize a software development process, it is also important to optimize the requirements and specifications engineering step. So, the domain for this proposed research would be concerned about the optimization of the requirements and specification collection and engineering step. 
+
+To be effective, software requirements should maintain clarity, consistency, and completeness~\cite{wiegers2013software}. However, real-world Software Requirements Specification (SRS) documents often fall short of this expectation due to communication gaps, inconsistent documentation practices, and varied stakeholder perspectives~\cite{nuseibeh2000requirements}. These issues result in ambiguous or overly verbose specifications that contain substantial portions of irrelevant or non-actionable information, hereafter referred to as ``noise.'' Such noise complicates analytical processes such as classification, prioritization, and traceability, increasing manual effort for analysts and creating delays within the Software Development Life Cycle (SDLC).
 
 Addressing this challenge requires the ability to automatically distinguish actionable requirements from noisy text. We model this as a Natural Language Processing (NLP) classification task, where a system must determine whether a given sentence constitutes a requirement. In addition to accuracy, cost efficiency is an essential design objective since many organizations and researchers operate with limited computational resources. Motivated by these considerations, we explore the use of lightweight transformer architectures as an effective and scalable solution for requirement noise reduction.
 
@@ -266,65 +270,54 @@ RoBERTa is an optimized variant of BERT that builds upon the same architecture b
 
 \subsection{Definition of Noise in Requirements}
 
-In the context of software requirements, noise can be referred to as irrelevant information or non-essential details that do not contribute to the actual functionality or goals of the system. These noises can be redundant information, ambiguous language or non-requirements. To illustrate an example from the RegExpPURE dataset \cite{ivanov2021regexppure}, the following is a clear requirement:
-\begin{quote}
-    System Initialization shall [SRS014] initiate the watchdog timer.
-\end{quote}
-And the following is a noise:
-\begin{quote}
-    A Working Group was established in May, 2006 to develop high-level functional specifications for an NLM Digital Repository for NLM collection materials and to identify policy and management issues related to the creation, design and management of the repository.
-\end{quote}
-We can see that in order to recognize what is a requirement and what is not a requirement, one needs to read the entire sentence and map the terms of the sentences to clarify what the sentence expresses. This can be used as an analogy of what the term `long range dependency' entails for transformer models, the model's awareness of the expressive meaning of every term in the sequence with one another. 
+In the context of software requirements, \textit{noise} refers to information that is irrelevant, extraneous, or not directly tied to the intended functionality or goals of the system. Such noise may appear in the form of redundant descriptions, historical background, policy statements, or any narrative content that does not express a verifiable requirement. These elements can obscure the true intent of stakeholders and hinder downstream tasks such as requirement classification and analysis.
 
-\subsection{Ensemble Pooling Approach}
+To illustrate, consider the following examples from the RegExpPURE dataset \cite{ivanov2021regexppure}.
 
-For this classification task of filtering noise, we propose a method that we call ``Ensemble Pooling''. Our approach consists of three layers - 
-
-\begin{enumerate}
-    \item \textbf{Tokenizer Layer :} This layer will appropriately tokenize the input sequence from text to corresponding vector representation.
-    \item \textbf{Transformer Layer :} This layer will produce the contextual embedding for the input sequence by feeding into the vector representation of the tokenizer layer.
-    \item \textbf{Classifier Layer :} This layer will use the contextual embedding (via pooling) produced by the transformer layer to classify the requirements from the noise. This layer would be trained with appropriate labels for classification. In our experimentation, we got better result with ensemble classifiers (hence the name, `Ensemble Pooling'). 
-\end{enumerate}
-
-The following \autoref{fig:ensemble_pooling_classification_approach} represents the architecture of our approach.
-
-\begin{figure*}[htbp]
+\begin{figure*}[tbp]
 \centerline{\includegraphics[width=\textwidth]{Figures/ensemble_pooling_classification.png}}
 \caption{The Ensemble Pooling Classification Approach}
 \Description{Architecture diagram showing three layers: Tokenizer Layer at the bottom, Transformer Layer in the middle, and Classifier Layer at the top, demonstrating the ensemble pooling approach for requirement classification}
 \label{fig:ensemble_pooling_classification_approach}
 \end{figure*}
 
-Here, we utilized the last hidden layer of the transformer models, which contains integrated information or the final contextualized embeddings from the entire sequence in a multidimensional vector representation (in the Huggingface Transformer library \cite{sanh2019distilbert}, the dimension is ($Seq_{size} \times Seq_{length} \times Size_{hidden}$) the default hidden size is $768$). But the most important content of the layer is the [CLS] token representation, which is added to each of the embeddings vector by the tokenizer and the vector for that token acts as the aggregate representation of the entire sequence \cite{devlin2018bert} \cite{sarzynska2021detecting}, that we use with the ensemble classifiers for classification tasks. The DistilBertForSequenceClassification and RobertaForSequenceClassification (based on DistilBERT and RoBERTa) classifiers offered by the Transformers library uses a similar approach, but with linear classification layer on top. These were compared as baselines.
+\begin{tcolorbox}[title=Example of a Requirement, colback=white]
+\textbf{Requirement:}\\
+System Initialization shall [SRS014] initiate the watchdog timer.
+\end{tcolorbox}
 
-Note that the transformer layer does not have any training cycle. This is because the transformer models used here (BERT and RoBERTa) are already trained over a large corpus of the English language and already have the necessary vocabulary structuring for language related tasks \cite{sanh2019distilbert} \cite{liu2019roberta}. This facilitates in reducing the cost and time that one had to invest with training. 
+\begin{tcolorbox}[title=Example of Noise, colback=white]
+\textbf{Noise:}\\
+A Working Group was established in May, 2006 to develop high-level functional specifications for an NLM Digital Repository for NLM collection materials and to identify policy and management issues related to the creation, design and management of the repository.
+\end{tcolorbox}
 
-\subsection{Classification Layer}
+Identifying whether a sentence expresses a requirement often requires interpreting the entire statement and understanding how its terms relate to the behavior of the system. This mirrors the notion of \textit{long-range dependency} in transformer-based models, where the model must capture semantic relationships across a sequence to infer meaning correctly.
 
-The classification layers were trained over the pooled vectors from the transformer layer and the labels from the dataset. The labels were converted to 0 for not a requirement (i.e. noise) and 1 for requirement (i.e a proper requirement). Then 4 classifier models were trained and evaluated, which were Random Forest Classifier, XGB Classifier, LightGBM classifier and SVM Classifier. Out of these, 3 are ensemble models (Random Forest, XGB, LightGBM). We chose ensemble models because they leverage multiple learning algorithms (or sub-classifiers) to obtain better predictive performance than could be obtained from any of the standalone models. Moreover, due to combining sub-classifier, ensemble models are robust against overfitting \cite{breiman2001randomforest}. On the other hand, SVM is not an ensemble model, rather it is a standalone classifier that determines a hyperplane to best separate the datapoints into classes \cite{cortes1995svm}. SVM was also experimented with as it had shown good performance in NLP related classification tasks in several works \cite{drucker1999svm} \cite{torisawa2007svm} \cite{joachims1998svm}.
 
-\subsection{Training Parameters}
 
-For the experiments, the core DistilBERT and RoBERTa models, used for ensemble pooling were not trained specifically for this study. However the two transformer based classifiers and the other classifiers were trained. The transformer based classifier models were fine tuned for classification, with the hyperparameters being the same for both - Batch Size = 16, Max Length = 128, Learning Rate = $2\times 10^{-5}$ and was trained over 10 epochs. Adam optimizer was used and Cross Entropy Loss was the loss function for both of the models. Both DistilBERT and RoBERTa is based on the BERT model. Their parameters have no difference. Where they do differ is in how they handle sequences in their inner layers (which is discussed in \autoref{sec:methodology})
 
-For the classifiers, all were fine tuned with 10 fold grid search cross validation. The target metric for the hyperparameter tuning was accuracy. The optimal hyperparameters for the models are as follows in \autoref{tab:lgbm_hyperparameters}, \autoref{tab:rf_hyperparameters}, \autoref{tab:svm_hyperparameters}, and \autoref{tab:xgb_hyperparameters}.
+\subsection{Ensemble Pooling Approach}
 
-% \begin{table}
-%   \caption{Frequency of Special Characters}
-%   \label{tab:freq}
-%   \begin{tabular}{ccl}
-%     \toprule
-%     Non-English or Math&Frequency&Comments\\
-%     \midrule
-%     \O & 1 in 1,000& For Swedish names\\
-%     $\pi$ & 1 in 5& Common in math\\
-%     \$ & 4 in 5 & Used in business\\
-%     $\Psi^2_1$ & 1 in 40,000& Unexplained usage\\
-%   \bottomrule
-% \end{tabular}
-% \end{table}
+For the task of noise filtering in software requirements, we introduce a method referred to as \textit{Ensemble Pooling}. The approach is composed of three layers:
 
-\begin{table}[htbp]
+\begin{enumerate}
+    \item \textbf{Tokenizer Layer:} This layer converts the input text into its corresponding vectorized token representation.
+    
+    \item \textbf{Transformer Layer:} The transformer processes the token embeddings to produce contextualized representations of the input sequence.
+    
+    \item \textbf{Classifier Layer:} Using pooled representations from the transformer outputs, this layer performs the final classification between requirement and noise. During experimentation, ensemble-based classifiers provided superior performance, which motivates the naming of our method as ``Ensemble Pooling''.
+\end{enumerate}
+
+\autoref{fig:ensemble_pooling_classification_approach} illustrates the overall architecture of the proposed method.
+
+
+Here, we utilize the final hidden layer of the transformer models, which contains the integrated information or the final contextualized embeddings for the entire input sequence. In the HuggingFace Transformers library \cite{sanh2019distilbert}, this layer is represented with the dimensionality $(Seq_{size} \times Seq_{length} \times Size_{hidden})$, where the default hidden size is $768$. Among all the vectors in this layer, the most crucial component is the representation of the special "[CLS]" token. This token is added by the tokenizer to each sequence, and its corresponding embedding acts as an aggregate representation of the entire input \cite{devlin2018bert} \cite{sarzynska2021detecting}. In our method, this "[CLS]" embedding is used as input to the ensemble classifiers for performing the requirement and noise classification.
+
+The DistilBertForSequenceClassification and RobertaForSequenceClassification models (based on DistilBERT and RoBERTa) provided by the Transformers library follow a similar mechanism, but instead place a linear classification head on top of the transformer outputs. These models are included as baselines for comparison in our experiments.
+
+It is also important to note that the transformer layer in our approach does not undergo any training. Since BERT and RoBERTa models have already been pretrained on large English corpora, they inherently possess strong linguistic structure and vocabulary understanding \cite{sanh2019distilbert} \cite{liu2019roberta}. Leveraging these pretrained models eliminates the need for additional training at the transformer level, reducing both computational cost and training time.
+
+\begin{table}[b]
 \caption{Random Forest Hyperparameters for RoBERTa and DistilBERT Pairings}
 \centering
 \footnotesize
@@ -341,6 +334,23 @@ Number of Estimators (\texttt{n\_estimators})   & 300  & 100 \\
 \end{tabular}
 \label{tab:rf_hyperparameters}
 \end{table}
+
+
+\subsection{Classification Layer}
+
+The classification layer was trained using the pooled vectors obtained from the transformer layer along with the corresponding labels from the dataset. The labels were mapped to binary values, where 0 denotes noise (not a requirement) and 1 denotes a valid requirement. Four classifier models were trained and evaluated: Random Forest, XGBoost, LightGBM, and SVM. Among these, three are ensemble models (Random Forest, XGBoost, and LightGBM). Ensemble methods combine the decisions of multiple sub-classifiers to achieve improved predictive performance compared to individual models. They also offer increased robustness to overfitting due to their aggregated decision processes \cite{breiman2001randomforest}.
+
+In contrast, SVM is not an ensemble method. It is a standalone classifier that seeks to determine the optimal hyperplane that best separates the data points into distinct classes \cite{cortes1995svm}. We included SVM in our experiments because it has demonstrated strong performance in various NLP classification tasks in prior studies \cite{drucker1999svm} \cite{torisawa2007svm} \cite{joachims1998svm}.
+
+
+\subsection{Training Parameters}
+
+For the experiments, the core DistilBERT and RoBERTa models used for the ensemble pooling approach were not trained specifically for this study. However, the two transformer-based classifier models and the standalone classifiers were trained. The transformer-based classifiers were fine tuned for the requirement classification task using identical hyperparameters for both models. The batch size was set to 16, the maximum sequence length to 128, and the learning rate to $2 \times 10^{-5}$. Training was conducted for 10 epochs using the Adam optimizer, with Cross Entropy Loss as the loss function. Although both DistilBERT and RoBERTa are built upon the BERT architecture and share the same parameter count, they differ in how they internally process sequences (as discussed in \autoref{sec:methodology}).
+
+For the non-transformer classifiers, all models were fine tuned using a 10 fold grid search cross validation setup. Accuracy was chosen as the target metric for hyperparameter optimization. The optimal hyperparameters for each model are presented in  \autoref{tab:rf_hyperparameters}, \autoref{tab:lgbm_hyperparameters}, \autoref{tab:xgb_hyperparameters} and \autoref{tab:svm_hyperparameters}. Here, the term ``Pairing'' refers to the process of feeding the hidden layer representations of the language models into the classifier models to generate predictions.
+
+
+
 
 
 \begin{table}
@@ -391,52 +401,79 @@ Number of Estimators (\texttt{n\_estimators})   & 300  & 100 \\
   \end{tabular}
 \end{table}
 
-Again, the term ``Pairing'' is referred to as using the hidden layer of the language models through the classifier models to make predictions. 
+
 
 
 \section{Results}
 \label{Results}
 
-As per the setup described in \autoref{sec:methodology}, we compared our experiments with the baseline paper. Similar to the baseline work, results are based on the validation set. For the result comparison, primarily used the accuracy metric (The rationale behind this choice of metric is discussed in the \autoref{Discussion}). The \autoref{tab:results_comparison} contains the results and the \autoref{table:baseline_results} shows the baseline paper result.  
+Following the setup described in \autoref{sec:methodology}, we compared our experimental outcomes with those reported in the baseline study. As in the baseline work, all results are computed on the validation set. For comparison, we primarily relied on the accuracy metric, and the justification for this choice is discussed in \autoref{Discussion}. The results of our experiments are presented in \autoref{tab:results_merged}, alongside the baseline for comparison.
 
-\begin{table}
-  \caption{Results Comparison of the Various Approaches}
-  \label{tab:results_comparison}
-  \begin{tabular}{ccl}
+For our experiments and the proposed approach to identifying requirement noise, we used the RegExpPURE dataset \cite{ivanov2021regexppure}. Consequently, our baseline consists of the results reported in the same paper, where the authors used the BERT base model to extract requirements. Although their work does not explicitly frame the task as noise reduction, their objective aligns closely with ours. As shown in \autoref{Dataset}, the dataset includes labeled requirement and non-requirement sentences. These non-requirement sentences correspond directly to what we define as noise. Therefore, using their work as a baseline is both appropriate and well justified.
+ 
+
+% \begin{table}
+%   \caption{Results Comparison of the Various Approaches}
+%   \label{tab:results_comparison}
+%   \begin{tabular}{ccl}
+%     \toprule
+%     Approach Category & Model / Technique & Accuracy (\%) \\
+%     \midrule
+%     DistilBERT & DistilBERT Sequence Classifier & 76 \\
+%     DistilBERT & DistilBERT + Random Forest     & \textbf{78} \\
+%     DistilBERT & DistilBERT + XGB               & 77 \\
+%     DistilBERT & DistilBERT + LightGBM          & 77 \\
+%     DistilBERT & DistilBERT + SVM               & 76 \\
+%     \midrule
+%     RoBERTa & RoBERTa Sequence Classifier & 77 \\
+%     RoBERTa & RoBERTa + Random Forest     & 75 \\
+%     RoBERTa & RoBERTa + XGB               & 77 \\
+%     RoBERTa & RoBERTa + LightGBM          & 77 \\
+%     RoBERTa & RoBERTa + SVM               & 77 \\
+%     \bottomrule
+%   \end{tabular}
+% \end{table}
+
+% \begin{table}
+%   \caption{Results of the Baseline Paper \cite{ivanov2021regexppure}}
+%   \label{table:baseline_results}
+%   \begin{tabular}{ccl}
+%     \toprule
+%     Approach & Accuracy (\%) & \\
+%     \midrule
+%     fastText   & 60 & \\
+%     ELMo + SVM & 59 & \\
+%     BERT       & 74 & \\
+%     \bottomrule
+%   \end{tabular}
+% \end{table}
+
+
+\begin{table}[b]
+  \caption{Comparison of Our Approaches with Baseline Results}
+  \label{tab:results_merged}
+  \begin{tabular}{lcc}
     \toprule
-    Approach Category & Model / Technique & Accuracy (\%) \\
+    Model / Technique & Category & Accuracy (\%) \\
     \midrule
-    DistilBERT & DistilBERT Sequence Classifier & 76 \\
-    DistilBERT & DistilBERT + Random Forest     & \textbf{78} \\
-    DistilBERT & DistilBERT + XGB               & 77 \\
-    DistilBERT & DistilBERT + LightGBM          & 77 \\
-    DistilBERT & DistilBERT + SVM               & 76 \\
+    fastText (Baseline) & Baseline & 60 \\
+    ELMo + SVM (Baseline) & Baseline & 59 \\
+    BERT (Baseline) & Baseline & 74 \\
     \midrule
-    RoBERTa & RoBERTa Sequence Classifier & 77 \\
-    RoBERTa & RoBERTa + Random Forest     & 75 \\
-    RoBERTa & RoBERTa + XGB               & 77 \\
-    RoBERTa & RoBERTa + LightGBM          & 77 \\
-    RoBERTa & RoBERTa + SVM               & 77 \\
+    DistilBERT Sequence Classifier & DistilBERT & 76 \\
+    DistilBERT + Random Forest & DistilBERT & \textbf{78} \\
+    DistilBERT + XGB & DistilBERT & 77 \\
+    DistilBERT + LightGBM & DistilBERT & 77 \\
+    DistilBERT + SVM & DistilBERT & 76 \\
+    \midrule
+    RoBERTa Sequence Classifier & RoBERTa & 77 \\
+    RoBERTa + Random Forest & RoBERTa & 75 \\
+    RoBERTa + XGB & RoBERTa & 77 \\
+    RoBERTa + LightGBM & RoBERTa & 77 \\
+    RoBERTa + SVM & RoBERTa & 77 \\
     \bottomrule
   \end{tabular}
 \end{table}
-
-\begin{table}
-  \caption{Results of the Baseline Paper \cite{ivanov2021regexppure}}
-  \label{table:baseline_results}
-  \begin{tabular}{ccl}
-    \toprule
-    Approach & Accuracy (\%) & \\
-    \midrule
-    fastText   & 60 & \\
-    ELMo + SVM & 59 & \\
-    BERT       & 74 & \\
-    \bottomrule
-  \end{tabular}
-\end{table}
-
-
-For our experiments and proposed approach of identifying requirement noise, we used the RegExpPURE dataset \cite{ivanov2021regexppure}. So, our baseline was the results in that paper for the dataset in which they utilized the BERT base model for extracting requirements. Though their work may not directly state noise reduction, but their work achieved similar objectives. As seen in \autoref{Dataset} their dataset consists labeled sentences of requirements and non requirements. And these non requirement sentences are precisely what we have defined as noise. So, the rationale for using this paper as a baseline is quite reasonable.
 
 
 \section{Discussion}
@@ -444,31 +481,27 @@ For our experiments and proposed approach of identifying requirement noise, we u
 
 \subsection{The Rationale for Accuracy}
 
-Accuracy is intuitive and easy to understand. It directly reflects the overall correctness of the model's predictions. In many scenarios, balanced performance across different classes is desirable. Accuracy treats all classes equally. Moreover, when the class distribution is roughly uniform (which is the case for the RegExpPURE Dataset), accuracy is a reasonable choice. And hence, accuracy was the chosen metric. \cite{sokolova2009systematic}.
+Accuracy is an intuitive and widely understood evaluation metric, as it directly reflects the proportion of correct predictions made by the model. In many classification scenarios, achieving balanced performance across classes is desirable, and accuracy provides an equal weighting of all classes. Since the class distribution in the RegExpPURE dataset is approximately uniform, accuracy serves as an appropriate and reliable metric for assessing model performance. For these reasons, and consistent with prior recommendations in the literature \cite{sokolova2009systematic}, accuracy was chosen as the primary evaluation metric in this study.
 
 \subsection{Base Classifier vs Ensemble Pooling}
 
-From the results in \autoref{tab:results_comparison} and \autoref{table:baseline_results} shows that our approach combining DistilBERT and Random Forest in ensemble pooling performs better in terms of accuracy when compared against all the approaches and baseline results. However, all the approaches with RoBERTa had quite close results, except Random Forest. This deviation is most likely due to how RoBERTa utilizes byte-pair encoding in tokenization and how the inner encoder layers attune to the context of the sequences \cite{liu2019roberta}. 
+The results in \autoref{tab:results_merged} show that our approach, which combines DistilBERT with a Random Forest classifier in the ensemble pooling setup, achieves higher accuracy than all other tested methods as well as the baseline results. The approaches involving RoBERTa produced scores that were relatively close to one another, with the exception of Random Forest. This deviation is most likely influenced by how RoBERTa applies byte pair encoding during tokenization and how its encoder layers adapt to contextual information in the sequence \cite{liu2019roberta}.
 
-The baseline paper showed the most promising result with BERT with about 74\% in accuracy. But baseline classifier of BERT, similar to DistilBERT and RoBERTa uses a neural network layer with a linear softmax activation function to generate class probability distribution. While effective in most cases, this classification task can benefit from more robust method of classification, ensemble classification. Since ensemble classifiers use bagging of sub classifiers, it is more robust in classification. Random Forest is one such ensemble method that ensembles decision trees. These trees or sub classifiers work in tandem for classification and improves accuracy, as seen from our experiments. Again, the rationale behind choosing DistilBERT and RoBERTa comes to their lightweight performance. They require much less computing resources compared to some other larger models and still remains a popular choice for smaller NLP related works. 
+The baseline paper reports its strongest performance using BERT, reaching approximately 74\% accuracy. In that baseline, the BERT classifier, similar to DistilBERT and RoBERTa classifiers, employs a neural network layer with a linear softmax activation function to produce class probabilities. While such architectures are effective for many tasks, our classification setting benefits from more robust methods such as ensemble classifiers. Ensemble methods aggregate the outputs of multiple sub-classifiers and often deliver improved predictive performance. Random Forest is one such method that combines decision trees, where each tree contributes to the final decision. This aggregated decision-making improves robustness and accuracy, and this effect is reflected in our experimental results. DistilBERT and RoBERTa were chosen due to their lightweight nature. They require fewer computational resources than larger transformer models and remain practical options for smaller NLP tasks.
 
-However, the lightweight nature is also one of the drawbacks of our approach. The accuracy results are still in the range below 80, which is a clear indication that these models fall short due to having smaller number of parameters compared to state of the art GPT, Gemini and LLAMA models (inferred from the ``Densing law of LLMs'' \cite{xiao2025densing}). So, as a future extension in requirement noise reduction, the viability of the state of the art models as well as stronger classification layers (stacking multiple classifiers for starters) remain as an yet to explore prospect. 
+However, the lightweight nature of these models also poses a limitation. The accuracy values remain below the 80 percent range, which suggests that these models are constrained by their relatively small parameter counts when compared with modern large-scale models such as GPT, Gemini, or LLaMA. This observation is aligned with the insights from the Densing Law of LLMs \cite{xiao2025densing}, which relates model capacity to performance. As a future research direction for requirement noise reduction, exploring the use of state-of-the-art large language models and more sophisticated classification strategies, such as stacking multiple classifiers, represents a promising and yet unexplored opportunity.
+
 
 
 \section{Conclusion}
 \label{Conclusion}
 
-In conclusion, this study contributed valuable insights into the application of transformer models in natural language processing tasks, specifically in the context of software requirements classification. By focusing on noise reduction, this research lays the foundation for enhancing the efficiency and effectiveness of the software development process. Our developed methodology showcased improved performance when compared with various out-of-the-box classifiers in terms of accuracy.
+This work investigated the use of transformer representations combined with ensemble classifiers to identify noise in software requirements. Through the proposed ensemble pooling approach, we demonstrated that lightweight pretrained models such as DistilBERT and RoBERTa, when paired with ensemble methods like Random Forest, can outperform standard transformer classification heads and the baseline reported in prior work. The results suggest that robust downstream classifiers can effectively complement pretrained language model embeddings in requirement classification tasks while maintaining low computational cost.
 
-While the current work primarily addressed noise reduction in requirements, the future direction of this research involves extending the classification pipeline to encompass all research objectives, including improving requirement assessment, conflict resolution and multimodal analysis (involving charts, diagrams, wireframes - etc.). 
+Although the study focused on noise reduction, the findings provide a foundation for extending automated requirement analysis pipelines. Future work includes incorporating advanced large language models, exploring stacked ensemble architectures, and expanding the scope beyond noise detection to address requirement assessment, conflict identification, and multimodal analysis involving diagrams and related artifacts. These directions present promising opportunities to further support practitioners in improving the clarity and quality of software requirements.
 
-%%
-%% The next two lines define the bibliography style to be used, and
-%% the bibliography file.
+
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{Bibliography}
 
 \end{document}
-\endinput
-%%
-%% End of file `sample-sigconf.tex'.
